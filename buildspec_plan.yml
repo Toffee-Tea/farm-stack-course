@@ -1,0 +1,26 @@
+version: 0.2 
+ 
+env: 
+  variables: 
+    TF_VERSION: "1.1.2"
+ 
+phases: 
+ 
+  install: 
+    commands: 
+      - pwd
+      - curl -LO https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip 
+      - unzip terraform_1.8.5_linux_amd64.zip 
+      - sudo mv terraform /usr/local/bin/
+      - terraform -version
+ 
+  build: 
+    commands: 
+      - pwd
+      - ls
+      - terraform init -no-color
+      - terraform plan
+ 
+  post_build: 
+    commands: 
+      - echo "Resources created by me"
