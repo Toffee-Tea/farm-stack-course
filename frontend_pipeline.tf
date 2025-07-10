@@ -1,7 +1,3 @@
-provider "aws" {
-    region = "us-east-1"
-}
-
 resource "aws_s3_bucket" "fe_codepipeline_bucket" {
   bucket = "fe-ebun-codepipe-bucket"
 }
@@ -104,7 +100,7 @@ resource "aws_iam_policy" "fe_codebuild_role_policy" {
   })
 }
 
-resource "aws_iam_policy_attachment" "codebuild_role_policy_attach" {
+resource "aws_iam_policy_attachment" "fe_codebuild_role_policy_attach" {
   name       = "fe_pipeline_role_policy_attach"
   roles      = [aws_iam_role.fe_codebuild_role.name]
   policy_arn = aws_iam_policy.fe_codebuild_role_policy.arn

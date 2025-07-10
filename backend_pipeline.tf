@@ -104,7 +104,7 @@ resource "aws_iam_policy" "be_codebuild_role_policy" {
   })
 }
 
-resource "aws_iam_policy_attachment" "codebuild_role_policy_attach" {
+resource "aws_iam_policy_attachment" "be_codebuild_role_policy_attach" {
   name       = "be_pipeline_role_policy_attach"
   roles      = [aws_iam_role.be_codebuild_role.name]
   policy_arn = aws_iam_policy.be_codebuild_role_policy.arn
