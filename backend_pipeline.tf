@@ -180,7 +180,7 @@ resource "aws_codepipeline" "be_codepipeline" {
 
       configuration = {
         Owner          = "Toffee-Tea"
-        Repo           = "farm-stack-course"
+        Repo           = "farm-stack-course-be"
         Branch         = "main"
         OAuthToken     = data.aws_ssm_parameter.be-github-parameter.value
       }
