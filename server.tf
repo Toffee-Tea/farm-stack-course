@@ -7,32 +7,11 @@ resource "aws_vpc" "cloudy" {
   }
 }
 
-resource "aws_route_table" "routepub" {
-  vpc_id = aws_vpc.cloudy.id
-  
-  route {
-    cidr_block = "0.0.0.0/0"            # Internet-bound traffic
-    gateway_id = aws_internet_gateway.ebungate.id
-  }
-
-  tags = {
-    Name = "pubroute"
-  }
-}
-
-resource "aws_route_table_association" "topubrt" {
-  subnet_id      = aws_subnet.pubsub.id
-  route_table_id = aws_route_table.routepub.id
-
-}
-
-resource "aws_route_table" "routepriv" {
+resource "aws_internet_gateway" "ebungate" {
   vpc_id = aws_vpc.cloudy.id
 
-  route = []
-
   tags = {
-    Name = "routepriv"
+    Name = "farm-igw"
   }
 }
 
@@ -47,26 +26,22 @@ resource "aws_subnet" "pubsub" {
   }
 }
 
-resource "aws_subnet" "privsub" {
-  vpc_id     = aws_vpc.cloudy.id
-  cidr_block = "10.0.2.0/24"
-
-  tags = {
-    Name = "privsub"
-  }
-}
-
-resource "aws_internet_gateway" "ebungate" {
+resource "aws_route_table" "routepub" {
   vpc_id = aws_vpc.cloudy.id
+  
+  route {
+    cidr_block = "0.0.0.0/0"            # Internet-bound traffic
+    gateway_id = aws_internet_gateway.ebungate.id
+  }
 
   tags = {
-    Name = "ebungate"
+    Name = "farm-pub-route"
   }
 }
 
-resource "aws_route_table_association" "toprivrt" {
-  subnet_id      = aws_subnet.privsub.id
-  route_table_id = aws_route_table.routepriv.id
+resource "aws_route_table_association" "topubrt" {
+  subnet_id      = aws_subnet.pubsub.id
+  route_table_id = aws_route_table.routepub.id
 
 }
 
@@ -92,50 +67,46 @@ resource "aws_security_group" "secg" {
   }
 }
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
+resource "aws_security_group" "be-secg" {
+  name        = "no-ssh"
+  description = "Allow HTTP only"
+  vpc_id      = aws_vpc.cloudy.id
 
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  # Optional: allow HTTP access
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
-
-  owners = ["099720109477"] # Canonical
 }
 
 resource "aws_instance" "ecpub" {
-  ami                    = data.aws_ami.ubuntu.id
+  ami                    = "ami-020cba7c55df1f615"
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.pubsub.id
   vpc_security_group_ids = [aws_security_group.secg.id]  # Add this line
-  
-  root_block_device {
-    volume_size = 8
-    volume_type = "gp3"
-  }
 
   tags = {
-    Name = "ecpub"
+    Name = "farm-server-fe-pub"
   }
 }
 
-resource "aws_instance" "ecpriv" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  subnet_id   = aws_subnet.privsub.id
-  vpc_security_group_ids = [aws_security_group.secg.id]  # Add this line
+resource "aws_instance" "ecpub" {
+  ami                    = "ami-020cba7c55df1f615"
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.pubsub.id
+  vpc_security_group_ids = [aws_security_group.be-secg.id]  # Add this line
 
-  root_block_device {
-    volume_size = 8
-    volume_type = "gp3"
-  }
-  
   tags = {
-    Name = "ecprivpriv"
+    Name = "farm-server-be-pub"
   }
 }
