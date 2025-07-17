@@ -100,7 +100,7 @@ resource "aws_instance" "ecpub" {
   }
 }
 
-resource "aws_instance" "ecpub" {
+resource "aws_instance" "be-ecpub" {
   ami                    = "ami-020cba7c55df1f615"
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.pubsub.id
