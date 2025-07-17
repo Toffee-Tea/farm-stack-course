@@ -68,7 +68,7 @@ resource "aws_security_group" "secg" {
 }
 
 resource "aws_security_group" "be-secg" {
-  name        = "no-ssh"
+  name        = "be-no-ssh"
   description = "Allow HTTP only"
   vpc_id      = aws_vpc.cloudy.id
 
